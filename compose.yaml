@@ -1,15 +1,32 @@
 version: "3.8"
 services:
+  # postgres:
+  #   image: postgres:latest
+  #   ports:
+  #     - "5432:5432"
+  #   # environment:
+  #   #   POSTGRES_USER: paul
+  #   #   POSTGRES_PASSWORD: xxxx
+  #   #   POSTGRES_DB: medusa-docker
+  #   env_file:
+  #     - env_files/db.env
+  #   volumes:
+  #     - postgres_data_kolle:/var/lib/postgresql/data
+  #     - ./postgres-certs/server.crt:/var/lib/postgresql/data/server.crt
+  #     - ./postgres-certs/server.key:/var/lib/postgresql/data/server.key
+
   postgres:
-    image: postgres:latest
+    build:
+        context: ./postgres
+        dockerfile: Dockerfile  # falls dein Dockerfile einen anderen Namen hat, passe den Namen hier an
     ports:
       - "5432:5432"
     env_file:
       - env_files/db.env
     volumes:
-      - postgres_data_neu_test:/var/lib/postgresql/data
-      - ./postgres-certs/server.crt:/var/lib/postgresql/data/server.crt
-      - ./postgres-certs/server.key:/var/lib/postgresql/data/server.key
+      - postgres_data_kolle:/var/lib/postgresql/data
+    # Überschreibe den Startbefehl, sodass der Custom-Config-File genutzt wird
+    command: postgres -c config_file=/etc/postgresql/postgres.conf
 
   redis:
     image: redis
@@ -48,12 +65,12 @@ services:
   #   container_name: pgadmin
   #   image: dpage/pgadmin4:latest
   #   environment:
-  #     - PGADMIN_DEFAULT_EMAIL=test@test.de
-  #     - PGADMIN_DEFAULT_PASSWORD=supergeheim
+  #     - PGADMIN_DEFAULT_EMAIL=pk@test.de
+  #     - PGADMIN_DEFAULT_PASSWORD=xxx
   #   ports:
   #     - "5050:80"
   #   restart: unless-stopped
 
 volumes:
-  postgres_data_neu_test:
+  postgres_data_kolle:
   redis_data_neu_test:

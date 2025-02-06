@@ -26,4 +26,4 @@ build
 .medusa
 
 env_files
-postgres-certs
+postgres
