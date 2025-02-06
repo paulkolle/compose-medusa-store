@@ -1,0 +1,59 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    env_file:
+      - env_files/db.env
+    volumes:
+      - postgres_data_neu_test:/var/lib/postgresql/data
+      - ./postgres-certs/server.crt:/var/lib/postgresql/data/server.crt
+      - ./postgres-certs/server.key:/var/lib/postgresql/data/server.key
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data_neu_test:/data
+
+  medusa-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+      - redis
+    env_file:
+      - env_files/medusaserver.env
+    ports:
+      - "9000:9000"
+    command: >
+      sh -c "cd .medusa/server && npm run predeploy && npm run start"
+
+  medusa-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+      - redis
+    env_file:
+      - env_files/medusaworker.env
+    command: >
+      sh -c "cd .medusa/server && npm run predeploy && npm run start"
+
+  # pgadmin:
+  #   container_name: pgadmin
+  #   image: dpage/pgadmin4:latest
+  #   environment:
+  #     - PGADMIN_DEFAULT_EMAIL=test@test.de
+  #     - PGADMIN_DEFAULT_PASSWORD=supergeheim
+  #   ports:
+  #     - "5050:80"
+  #   restart: unless-stopped
+
+volumes:
+  postgres_data_neu_test:
+  redis_data_neu_test:
