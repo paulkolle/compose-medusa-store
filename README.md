@@ -168,15 +168,6 @@ Now, Medusa should be running and accessible at:
 
 ---
 
-## 📌 Next Steps
-
-Once the server is running, you can:
-Guter Punkt! Ich habe die Anleitung entsprechend angepasst, um darauf hinzuweisen, dass man sich innerhalb des Containers in das Verzeichnis `.medusa/server` bewegen muss.
-
-Hier ist die **aktualisierte Version des relevanten Abschnitts**:
-
----
-
 ### **🛠️ Creating an Admin User**
 After starting the Medusa server, you need to create an admin user to access the system.
 
