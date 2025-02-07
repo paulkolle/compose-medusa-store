@@ -19,6 +19,7 @@
     # Nur Production-Dependencies
     COPY package*.json ./
     RUN npm install --only=production
+    RUN apt-get update && apt-get install -y curl
     
     # Kopiere den Build aus dem Builder-Container
     COPY --from=builder /app/.medusa/server ./.medusa/server

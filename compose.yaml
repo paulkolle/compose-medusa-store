@@ -1,61 +1,67 @@
 version: "3.8"
 services:
-  # postgres:
-  #   image: postgres:latest
-  #   ports:
-  #     - "5432:5432"
-  #   # environment:
-  #   #   POSTGRES_USER: paul
-  #   #   POSTGRES_PASSWORD: xxxx
-  #   #   POSTGRES_DB: medusa-docker
-  #   env_file:
-  #     - env_files/db.env
-  #   volumes:
-  #     - postgres_data_kolle:/var/lib/postgresql/data
-  #     - ./postgres-certs/server.crt:/var/lib/postgresql/data/server.crt
-  #     - ./postgres-certs/server.key:/var/lib/postgresql/data/server.key
-
   postgres:
     build:
         context: ./postgres
-        dockerfile: Dockerfile  # falls dein Dockerfile einen anderen Namen hat, passe den Namen hier an
-    ports:
-      - "5432:5432"
+        dockerfile: Dockerfile  
+    # ports:
+    #   - "5432:5432"
     env_file:
       - env_files/db.env
     volumes:
-      - postgres_data_kolle:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     # Überschreibe den Startbefehl, sodass der Custom-Config-File genutzt wird
     command: postgres -c config_file=/etc/postgresql/postgres.conf
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
 
   redis:
     image: redis
-    ports:
-      - "6379:6379"
+    # ports:
+    #   - "6379:6379"
     volumes:
-      - redis_data_neu_test:/data
+      - redis_data:/data
 
   medusa-server:
     build:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+        restart: true
+      redis:
+        condition: service_started
     env_file:
       - env_files/medusaserver.env
     ports:
       - "9000:9000"
     command: >
       sh -c "cd .medusa/server && npm run predeploy && npm run start"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f localhost:9000/health || exit 1"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
 
   medusa-worker:
     build:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+        restart: true
+      redis:
+        condition: service_started
+      # Warte zusätzlich, bis medusa-server "healthy" ist
+      medusa-server:
+        condition: service_healthy
     env_file:
       - env_files/medusaworker.env
     command: >
@@ -72,5 +78,5 @@ services:
   #   restart: unless-stopped
 
 volumes:
-  postgres_data_kolle:
-  redis_data_neu_test:
+  postgres_data:
+  redis_data:
