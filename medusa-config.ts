@@ -71,7 +71,7 @@ module.exports = defineConfig({
     ] : []),
 
     // Nodemailer nur laden, wenn E-Mail Zugangsdaten vorhanden sind
-    ...(process.env.MAIL_HOST && process.env.MAIL_USER && process.env.MAIL_PW ? [
+    ...(process.env.MAIL_HOST && process.env.MAIL_USER && process.env.MAIL_PW && process.env.DC_WEBHOOK_URL ? [
       {
         resolve: "@medusajs/medusa/notification",
         options: {
@@ -87,6 +87,14 @@ module.exports = defineConfig({
                   user: process.env.MAIL_USER,
                   pass: process.env.MAIL_PW,
                 },
+              },
+            },
+            {
+              resolve: "./src/modules/discord",
+              id: "discord",
+              options: {
+                channels: ["discord"],
+                webhookUrl: process.env.DC_WEBHOOK_URL,
               },
             },
           ],

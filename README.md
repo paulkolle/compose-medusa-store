@@ -22,7 +22,7 @@ cd compose-medusa-store
 ### 2️⃣ Create the `env_files` directory and set up your environment variables:
 
 ```bash
-cp env_files_example env_files
+cp -r env_files_example env_files
 ```
 
 Edit the `.env` files in `env_files/` according to your setup. The environment files store critical configuration such as database credentials, API keys, and service settings.
