@@ -11,6 +11,7 @@ if (process.env.MAIL_HOST && process.env.MAIL_USER && process.env.MAIL_PW) {
     id: "nodemailer",
     options: {
       channels: ["email"],
+      host: process.env.MAIL_HOST,
       port: 587,
       auth: {
         user: process.env.MAIL_USER,
