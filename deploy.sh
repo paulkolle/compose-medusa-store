@@ -43,10 +43,10 @@ echo -e "${GREEN}Hole Änderungen von origin master...${NC}"
 git fetch origin master
 echo -e "${GREEN}Führe merge mit 'origin master' aus...${NC}"
 git merge origin/master
-echo -e "${GREEN}Docker-compose down......${NC}"
-docker-compose down
+echo -e "${GREEN}Docker compose down......${NC}"
+docker compose down
 echo -e "${GREEN}Docker-Container neu aufbauen und starten...${NC}"
-docker-compose up -d --build
+docker compose up -d --build
 ENDSSH
 
 echo -e "${GREEN}Deployment abgeschlossen!${NC}"
