@@ -2,13 +2,42 @@ import { loadEnv, defineConfig } from '@medusajs/framework/utils'
 
 loadEnv(process.env.NODE_ENV || 'development', process.cwd())
 
+const notificationProviders: any[] = []
+
+
+if (process.env.MAIL_HOST && process.env.MAIL_USER && process.env.MAIL_PW) {
+  notificationProviders.push({
+    resolve: "./src/modules/nodemailer",
+    id: "nodemailer",
+    options: {
+      channels: ["email"],
+      host: process.env.MAIL_HOST,
+      port: 465,
+      auth: {
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PW,
+      }
+    },
+  })
+}
+
+if (process.env.DC_WEBHOOK_URL) {
+  notificationProviders.push({
+    resolve: "./src/modules/discord",
+    id: "discord",
+    options: {
+      channels: ["discord"],
+      webhookUrl: process.env.DC_WEBHOOK_URL,
+    },
+  })
+}
 
 module.exports = defineConfig({
   projectConfig: {
     workerMode: process.env.MEDUSA_WORKER_MODE as "shared" | "worker" | "server",
     redisUrl: process.env.REDIS_URL,
-    databaseDriverOptions: process.env.NODE_ENV !== "development" 
-      ? { connection: { ssl: { rejectUnauthorized: false } } } 
+    databaseDriverOptions: process.env.NODE_ENV !== "development"
+      ? { connection: { ssl: { rejectUnauthorized: false } } }
       : {},
     databaseUrl: process.env.DATABASE_URL,
     http: {
@@ -70,37 +99,16 @@ module.exports = defineConfig({
       },
     ] : []),
 
-    // Nodemailer nur laden, wenn E-Mail Zugangsdaten vorhanden sind
-    ...(process.env.MAIL_HOST && process.env.MAIL_USER && process.env.MAIL_PW && process.env.DC_WEBHOOK_URL ? [
-      {
-        resolve: "@medusajs/medusa/notification",
-        options: {
-          providers: [
-            {
-              resolve: "./src/modules/nodemailer",
-              id: "nodemailer",
-              options: {
-                channels: ["email"],
-                host: process.env.MAIL_HOST,
-                port: 465,
-                auth: {
-                  user: process.env.MAIL_USER,
-                  pass: process.env.MAIL_PW,
-                },
-              },
-            },
-            {
-              resolve: "./src/modules/discord",
-              id: "discord",
-              options: {
-                channels: ["discord"],
-                webhookUrl: process.env.DC_WEBHOOK_URL,
-              },
-            },
-          ],
+    ...(notificationProviders.length > 0
+      ? [
+        {
+          resolve: "@medusajs/medusa/notification",
+          options: {
+            providers: notificationProviders,
+          },
         },
-      },
-    ] : []),
+      ]
+      : []),
 
     // Redis-basierte Module nur laden, wenn REDIS_URL existiert
     ...(process.env.REDIS_URL ? [

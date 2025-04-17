@@ -22,6 +22,8 @@ type Options = {
         user: string
         pass: string
     }
+    telegram_username: string
+    dc_user_id: string
 }
 
 class NodemailerProviderService extends AbstractNotificationProviderService {
@@ -76,7 +78,7 @@ class NodemailerProviderService extends AbstractNotificationProviderService {
             host: options.host,
             port: options.port,
             secure: options.port === 465, // true für SSL, false für STARTTLS
-            auth: options.auth,
+            auth: options.auth
         })
     }
 
@@ -86,7 +88,7 @@ class NodemailerProviderService extends AbstractNotificationProviderService {
         try {
             // Mail-Optionen
             const mailOptions = {
-                from: `"Dein Shop" <${this.options_.auth.user}>`,
+                from: `"paulkolle.de" <${this.options_.auth.user}>`,
                 to: notification.to,
                 subject: notification.data?.subject as string || "Benachrichtigung",
                 text: notification.data?.text as string || undefined,
